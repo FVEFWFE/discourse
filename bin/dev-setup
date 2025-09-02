@@ -1,0 +1,34 @@
+#!/bin/bash
+# Development setup script
+
+echo "🚀 Setting up Discourse development environment..."
+
+# 1. Start Docker services
+echo "Starting Docker services..."
+docker-compose -f docker-compose.dev.yml up -d
+
+# 2. Wait for services
+echo "Waiting for services to be ready..."
+until pg_isready -h localhost -p 5432; do
+  sleep 1
+done
+
+# 3. Setup database
+echo "Setting up database..."
+bin/rails db:create db:migrate
+
+# 4. Create admin user
+echo "Creating admin user..."
+bin/rails "admin:create[admin@example.com,password123,admin]"
+
+# 5. Start development servers
+echo "Starting development servers..."
+echo "Run these in separate terminals:"
+echo "  1. bin/ember-cli server"
+echo "  2. RAILS_ENV=development bin/rails server"
+echo "  3. bin/rails autospec (for tests)"
+
+echo "✅ Setup complete!"
+echo "Access at: http://localhost:4200"
+echo "MailCatcher at: http://localhost:1080"
+echo "PgAdmin at: http://localhost:5050"
