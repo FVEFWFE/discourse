@@ -1,0 +1,28 @@
+{
+  "name": "Unreal Engine Forum Theme",
+  "component": false,
+  "license_url": null,
+  "about_url": null,
+  "authors": null,
+  "theme_version": "1.0",
+  "minimum_discourse_version": null,
+  "maximum_discourse_version": null,
+  "assets": {
+    "logo": "assets/logo.png",
+    "logo_small": "assets/logo-small.png"
+  },
+  "color_schemes": {
+    "Unreal Dark": {
+      "primary": "ffffff",
+      "secondary": "0e1015", 
+      "tertiary": "0084ff",
+      "quaternary": "7a54ff",
+      "header_background": "0e1015",
+      "header_primary": "ffffff",
+      "highlight": "ffd700",
+      "danger": "ff6666",
+      "success": "13c208",
+      "love": "ff6b6b"
+    }
+  }
+}

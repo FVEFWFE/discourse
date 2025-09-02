@@ -1,0 +1,73 @@
+// Unreal Engine Forum Theme
+// Mimics the look of forums.unrealengine.com
+
+// Dark background like UE forums
+html {
+  background-color: #0e1015;
+}
+
+// Navigation bar styling
+.d-header {
+  background-color: #0e1015;
+  border-bottom: 1px solid #2a2e33;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+// Primary navigation
+.navigation-container {
+  background-color: #1a1d21;
+  border-bottom: 3px solid #0084ff;
+}
+
+// Category boxes with UE-style gradient
+.category-box {
+  background: linear-gradient(135deg, #1a1d21 0%, #2a2e33 100%);
+  border: 1px solid #3a3e43;
+  border-radius: 8px;
+  
+  &:hover {
+    border-color: #0084ff;
+    box-shadow: 0 0 20px rgba(0,132,255,0.3);
+  }
+}
+
+// Topic list styling
+.topic-list {
+  .topic-list-item {
+    border-bottom: 1px solid #2a2e33;
+    
+    &:hover {
+      background-color: rgba(0,132,255,0.1);
+    }
+  }
+}
+
+// Buttons with UE blue
+.btn-primary {
+  background: linear-gradient(135deg, #0084ff 0%, #0066cc 100%);
+  border: none;
+  
+  &:hover {
+    background: linear-gradient(135deg, #0099ff 0%, #0077ee 100%);
+    box-shadow: 0 0 15px rgba(0,132,255,0.5);
+  }
+}
+
+// Code blocks with UE styling
+pre code {
+  background-color: #0e1015;
+  border: 1px solid #2a2e33;
+  border-radius: 4px;
+}
+
+// Badges and tags
+.badge-category {
+  border-radius: 3px;
+  padding: 3px 8px;
+}
+
+// User cards
+.user-card {
+  background-color: #1a1d21;
+  border: 1px solid #2a2e33;
+}
