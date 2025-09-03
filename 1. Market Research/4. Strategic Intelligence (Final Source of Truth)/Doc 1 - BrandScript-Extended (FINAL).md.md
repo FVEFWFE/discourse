@@ -1,0 +1,3 @@
+- [ ] Decide on name
+	- [ ] MongerMap.io or not?
+		- [ ] Buy domain if yes
