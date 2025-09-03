@@ -4,6 +4,7 @@ import { GeistSans } from "geist/font/sans";
 import { type Metadata } from "next";
 
 import { TRPCReactProvider } from "~/trpc/react";
+import { Providers } from "~/components/providers";
 
 export const metadata: Metadata = {
   title: "MongerMaps - The Bloomberg Terminal for Mongers",
@@ -17,7 +18,9 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${GeistSans.variable} dark`}>
       <body className="font-sans antialiased bg-gray-950 text-gray-100">
-        <TRPCReactProvider>{children}</TRPCReactProvider>
+        <Providers>
+          <TRPCReactProvider>{children}</TRPCReactProvider>
+        </Providers>
       </body>
     </html>
   );

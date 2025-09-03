@@ -2,6 +2,37 @@ import { z } from "zod";
 import { createTRPCRouter, publicProcedure, subscribedProcedure } from "~/server/api/trpc";
 
 export const venueRouter = createTRPCRouter({
+  getVenuesForMap: subscribedProcedure
+    .input(z.object({
+      city: z.literal("pattaya").default("pattaya"),
+    }))
+    .query(async ({ ctx, input }) => {
+      const venues = await ctx.db.venue.findMany({
+        where: {
+          // Filter by city when we have multiple cities
+        },
+        select: {
+          id: true,
+          name: true,
+          type: true,
+          latitude: true,
+          longitude: true,
+          avgGfeScore: true,
+          avgPriceST: true,
+          district: true,
+          _count: {
+            select: { reports: true },
+          },
+        },
+      });
+
+      // Calculate avgPlayerScore (using avgGfeScore as the base)
+      return venues.map(venue => ({
+        ...venue,
+        avgPlayerScore: venue.avgGfeScore || 0,
+      }));
+    }),
+
   getAll: subscribedProcedure
     .input(z.object({
       city: z.string().default("pattaya"),
