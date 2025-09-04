@@ -1,282 +1,372 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
-import Map, { Marker, Popup } from "react-map-gl";
-import { api } from "~/trpc/react";
-import { AppShell } from "~/components/layout/AppShell";
+import { useEffect, useRef, useState } from "react";
+import { useSession } from "next-auth/react";
+import mapboxgl from "mapbox-gl";
+import "mapbox-gl/dist/mapbox-gl.css";
+import { Shell } from "~/components/shell";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { Button } from "~/components/ui/button";
-import { Badge } from "~/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
 import { Slider } from "~/components/ui/slider";
 import { Checkbox } from "~/components/ui/checkbox";
-import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover";
-import { MapPin, Filter } from "lucide-react";
-import Link from "next/link";
-import "mapbox-gl/dist/mapbox-gl.css";
+import { Label } from "~/components/ui/label";
+import { Button } from "~/components/ui/button";
+import { Switch } from "~/components/ui/switch";
+import { Badge } from "~/components/ui/badge";
+import { PaywallModal } from "~/components/paywall-modal";
+import { MapPin, Route, Lock, Filter } from "lucide-react";
+import { api } from "~/trpc/react";
+import { env } from "~/env";
 
-type VenueType = "GOGO_BAR" | "BEER_BAR" | "GENTLEMENS_CLUB" | "MASSAGE_PARLOR" | "HOTEL" | "RESTAURANT" | "OTHER";
-
-interface Filters {
-  venueType: VenueType | "ALL";
-  minPlayerScore: number;
-  maxPlayerScore: number;
-  showGFE: boolean;
-  showBBFS: boolean;
+// Initialize Mapbox
+if (env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN) {
+  mapboxgl.accessToken = env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
 }
 
-const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || "";
-
 export default function MapPage() {
-  const [selectedVenue, setSelectedVenue] = useState<string | null>(null);
-  const [filters, setFilters] = useState<Filters>({
-    venueType: "ALL",
-    minPlayerScore: 0,
-    maxPlayerScore: 10,
-    showGFE: false,
-    showBBFS: false,
-  });
-
-  const { data: venues, isLoading } = api.venue.getVenuesForMap.useQuery({
-    city: "pattaya",
-  });
-
-  // Filter venues based on current filters
-  const filteredVenues = useMemo(() => {
-    if (!venues) return [];
-
-    return venues.filter(venue => {
-      // Venue type filter
-      if (filters.venueType !== "ALL" && venue.type !== filters.venueType) {
-        return false;
-      }
-
-      // Player score filter
-      if (venue.avgPlayerScore < filters.minPlayerScore || venue.avgPlayerScore > filters.maxPlayerScore) {
-        return false;
-      }
-
-      // TODO: Add GFE and BBFS filters when we have that data
-      // For now, these filters don't affect the results
-
-      return true;
+  const { data: session } = useSession();
+  const mapContainer = useRef<HTMLDivElement>(null);
+  const map = useRef<mapboxgl.Map | null>(null);
+  const markers = useRef<mapboxgl.Marker[]>([]);
+  
+  const [showPaywall, setShowPaywall] = useState(false);
+  const [venueType, setVenueType] = useState("");
+  const [district, setDistrict] = useState("");
+  const [scoreRange, setScoreRange] = useState([8.0]);
+  const [priceRange, setPriceRange] = useState([1500]);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [showVeteranPath, setShowVeteranPath] = useState(false);
+  
+  const isPaid = session?.user?.isPaid;
+  const tags = ["GFE", "BBFS", "Starfish", "BBBJ", "CIM", "COF"];
+  
+  // Fetch venues data
+  const { data: venues, isLoading } = api.intelligence.getVenues.useQuery(
+    {
+      city: "pattaya",
+      filters: {
+        minVibeScore: scoreRange[0],
+        maxPrice: priceRange[0],
+        tags: selectedTags.length > 0 ? selectedTags : undefined,
+        venueType: venueType ? [venueType.toUpperCase()] : undefined,
+      },
+    },
+    {
+      enabled: !!isPaid,
+    }
+  );
+  
+  // Initialize map
+  useEffect(() => {
+    if (!mapContainer.current || !env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN) return;
+    
+    map.current = new mapboxgl.Map({
+      container: mapContainer.current,
+      style: "mapbox://styles/mapbox/dark-v11",
+      center: [100.8782, 12.9236], // Pattaya coordinates
+      zoom: 13,
     });
-  }, [venues, filters]);
-
-  const getMarkerColor = (score: number) => {
-    if (score >= 8.5) return "#4ade80"; // green-400
-    if (score < 7.0) return "#f87171"; // red-400
-    return "#9ca3af"; // gray-400
+    
+    map.current.addControl(new mapboxgl.NavigationControl(), "top-right");
+    
+    return () => {
+      map.current?.remove();
+    };
+  }, []);
+  
+  // Update markers when venues data changes
+  useEffect(() => {
+    if (!map.current || !venues || !isPaid) return;
+    
+    // Clear existing markers
+    markers.current.forEach(marker => marker.remove());
+    markers.current = [];
+    
+    // Add new markers
+    venues.forEach(venue => {
+      // Determine marker color based on vibe score
+      let color = "#ef4444"; // red
+      if (venue.vibeScore >= 8) color = "#22c55e"; // green
+      else if (venue.vibeScore >= 6) color = "#eab308"; // yellow
+      
+      const el = document.createElement("div");
+      el.className = "marker";
+      el.style.width = "24px";
+      el.style.height = "24px";
+      el.style.backgroundColor = color;
+      el.style.borderRadius = "50%";
+      el.style.border = "2px solid white";
+      el.style.cursor = "pointer";
+      el.style.boxShadow = "0 2px 4px rgba(0,0,0,0.3)";
+      
+      const marker = new mapboxgl.Marker(el)
+        .setLngLat([venue.coordinates.lng, venue.coordinates.lat])
+        .setPopup(
+          new mapboxgl.Popup({ offset: 25 }).setHTML(`
+            <div class="p-3">
+              <h3 class="font-bold text-lg mb-2">${venue.name}</h3>
+              <div class="space-y-1">
+                <div class="flex justify-between">
+                  <span class="text-sm text-gray-600">Vibe Score:</span>
+                  <span class="font-semibold">${venue.vibeScore.toFixed(1)}</span>
+                </div>
+                ${venue.avgPriceST ? `
+                  <div class="flex justify-between">
+                    <span class="text-sm text-gray-600">Avg Price (ST):</span>
+                    <span class="font-semibold">${Math.round(venue.avgPriceST)} THB</span>
+                  </div>
+                ` : ""}
+                <div class="flex justify-between">
+                  <span class="text-sm text-gray-600">Reports:</span>
+                  <span class="font-semibold">${venue.reportCount}</span>
+                </div>
+              </div>
+              <button onclick="window.location.href='/venue/${venue.id}'" class="mt-3 w-full bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700">
+                View Details
+              </button>
+            </div>
+          `)
+        )
+        .addTo(map.current);
+      
+      markers.current.push(marker);
+    });
+  }, [venues, isPaid]);
+  
+  // Handle filter changes
+  const handleFilterChange = () => {
+    if (!isPaid) {
+      setShowPaywall(true);
+    }
   };
 
-  const handleMarkerClick = useCallback((venueId: string) => {
-    setSelectedVenue(venueId);
-  }, []);
-
-  if (isLoading) {
-    return (
-      <AppShell>
-        <div className="flex items-center justify-center h-full">
-          <div className="animate-pulse text-gray-400">Loading map data...</div>
-        </div>
-      </AppShell>
-    );
-  }
-
-  if (!MAPBOX_TOKEN) {
-    return (
-      <AppShell>
-        <div className="flex items-center justify-center h-full">
-          <div className="text-red-400">Mapbox token not configured</div>
-        </div>
-      </AppShell>
-    );
-  }
-
   return (
-    <AppShell>
+    <Shell>
       <div className="relative h-full">
-        <Map
-          mapboxAccessToken={MAPBOX_TOKEN}
-          initialViewState={{
-            latitude: 12.9236,
-            longitude: 100.8825,
-            zoom: 13,
-          }}
-          style={{ width: "100%", height: "100%" }}
-          mapStyle="mapbox://styles/mapbox/dark-v11"
-        >
-          {filteredVenues.map((venue) => (
-            <Marker
-              key={venue.id}
-              latitude={venue.latitude}
-              longitude={venue.longitude}
-              onClick={(e) => {
-                e.originalEvent.stopPropagation();
-                handleMarkerClick(venue.id);
-              }}
-            >
-              <div
-                className="cursor-pointer transform hover:scale-110 transition-transform"
-                style={{ color: getMarkerColor(venue.avgPlayerScore) }}
-              >
-                <MapPin className="h-6 w-6" fill="currentColor" />
-              </div>
-            </Marker>
-          ))}
-
-          {selectedVenue && (() => {
-            const venue = venues?.find(v => v.id === selectedVenue);
-            if (!venue) return null;
-
-            return (
-              <Popup
-                latitude={venue.latitude}
-                longitude={venue.longitude}
-                onClose={() => setSelectedVenue(null)}
-                closeOnClick={false}
-                anchor="bottom"
-                className="mongermaps-popup"
-              >
-                <div className="p-2 min-w-[200px]">
-                  <h3 className="font-bold text-white mb-1">{venue.name}</h3>
-                  <div className="flex items-center gap-2 mb-2">
-                    <Badge variant="secondary" className="text-xs">
-                      {venue.type.replace('_', ' ')}
-                    </Badge>
-                    <span className="text-xs text-gray-400">{venue.district}</span>
-                  </div>
-                  <div className="mb-3">
-                    <span className="text-sm text-gray-300">Player Score: </span>
-                    <span
-                      className="font-bold"
-                      style={{ color: getMarkerColor(venue.avgPlayerScore) }}
-                    >
-                      {venue.avgPlayerScore.toFixed(1)}/10
-                    </span>
-                  </div>
-                  <Link href={`/venue/${venue.id}`}>
-                    <Button size="sm" className="w-full">
-                      View Full Dossier
-                    </Button>
-                  </Link>
-                </div>
-              </Popup>
-            );
-          })()}
-        </Map>
-
         {/* Filter Panel */}
-        <Card className="absolute top-4 left-4 w-80 bg-gray-900/95 backdrop-blur border-gray-800">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Filter className="h-4 w-4" />
-              Intel Filters
+        <Card className="absolute top-4 left-4 w-80 z-10 max-h-[calc(100vh-120px)] overflow-y-auto">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Filter className="h-5 w-5" />
+              Filters
+              {!isPaid && (
+                <Badge variant="secondary" className="ml-auto">
+                  <Lock className="h-3 w-3 mr-1" />
+                  Premium
+                </Badge>
+              )}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* Venue Type Filter */}
-            <div>
-              <label className="text-sm font-medium text-gray-300 mb-2 block">
-                Venue Type
-              </label>
-              <Select value={filters.venueType} onValueChange={(value) => setFilters({ ...filters, venueType: value as VenueType | "ALL" })}>
+            {/* Veteran's Path toggle */}
+            <div className="flex items-center justify-between">
+              <Label htmlFor="veteran-path" className="text-sm font-medium flex items-center gap-2">
+                <Route className="h-4 w-4" />
+                Show Veteran's Path
+              </Label>
+              <Switch 
+                id="veteran-path" 
+                checked={showVeteranPath} 
+                onCheckedChange={(checked) => {
+                  if (!isPaid) {
+                    setShowPaywall(true);
+                  } else {
+                    setShowVeteranPath(checked);
+                  }
+                }}
+                disabled={!isPaid}
+              />
+            </div>
+
+            <div className={!isPaid ? "opacity-50" : ""}>
+              <Label className="text-sm font-medium">Venue Type</Label>
+              <Select 
+                value={venueType} 
+                onValueChange={(value) => {
+                  handleFilterChange();
+                  if (isPaid) setVenueType(value);
+                }}
+                disabled={!isPaid}
+              >
                 <SelectTrigger>
-                  <SelectValue />
+                  <SelectValue placeholder="All types" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="ALL">All Venues</SelectItem>
-                  <SelectItem value="GOGO_BAR">GoGo Bars</SelectItem>
-                  <SelectItem value="BEER_BAR">Beer Bars</SelectItem>
-                  <SelectItem value="GENTLEMENS_CLUB">Gentlemen's Clubs</SelectItem>
-                  <SelectItem value="MASSAGE_PARLOR">Massage Parlors</SelectItem>
+                  <SelectItem value="">All types</SelectItem>
+                  <SelectItem value="gogo_bar">Go-Go Bar</SelectItem>
+                  <SelectItem value="beer_bar">Beer Bar</SelectItem>
+                  <SelectItem value="gentlemens_club">Gentlemen's Club</SelectItem>
+                  <SelectItem value="massage_parlor">Massage Parlor</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            {/* Player Score Range */}
-            <div>
-              <label className="text-sm font-medium text-gray-300 mb-2 block">
-                Player Score™ Range: {filters.minPlayerScore} - {filters.maxPlayerScore}
-              </label>
-              <div className="space-y-2">
+            <div className={!isPaid ? "opacity-50" : ""}>
+              <Label className="text-sm font-medium">District</Label>
+              <Select 
+                value={district} 
+                onValueChange={(value) => {
+                  handleFilterChange();
+                  if (isPaid) setDistrict(value);
+                }}
+                disabled={!isPaid}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="All districts" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">All districts</SelectItem>
+                  <SelectItem value="walking-street">Walking Street</SelectItem>
+                  <SelectItem value="soi-6">Soi 6</SelectItem>
+                  <SelectItem value="lk-metro">LK Metro</SelectItem>
+                  <SelectItem value="soi-buakhao">Soi Buakhao</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className={!isPaid ? "opacity-50" : ""}>
+              <Label className="text-sm font-medium">Vibe Score™ Range</Label>
+              <div className="px-2 py-4">
                 <Slider
-                  value={[filters.minPlayerScore, filters.maxPlayerScore]}
-                  onValueChange={([min, max]) => setFilters({ ...filters, minPlayerScore: min, maxPlayerScore: max })}
-                  min={0}
+                  value={scoreRange}
+                  onValueChange={(value) => {
+                    handleFilterChange();
+                    if (isPaid) setScoreRange(value);
+                  }}
                   max={10}
-                  step={0.5}
+                  min={1}
+                  step={0.1}
                   className="w-full"
+                  disabled={!isPaid}
                 />
+                <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                  <span>1.0</span>
+                  <span className="font-medium">{scoreRange[0]?.toFixed(1)}</span>
+                  <span>10.0</span>
+                </div>
               </div>
             </div>
 
-            {/* Tag Filters */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-300 mb-2 block">
-                Service Tags
-              </label>
-              <div className="space-y-2">
-                <label className="flex items-center space-x-2">
-                  <Checkbox
-                    checked={filters.showGFE}
-                    onCheckedChange={(checked) => setFilters({ ...filters, showGFE: !!checked })}
-                  />
-                  <span className="text-sm text-gray-300">GFE Available</span>
-                </label>
-                <label className="flex items-center space-x-2">
-                  <Checkbox
-                    checked={filters.showBBFS}
-                    onCheckedChange={(checked) => setFilters({ ...filters, showBBFS: !!checked })}
-                  />
-                  <span className="text-sm text-gray-300">BBFS Offered</span>
-                </label>
+            <div className={!isPaid ? "opacity-50" : ""}>
+              <Label className="text-sm font-medium">Price Range (THB)</Label>
+              <div className="px-2 py-4">
+                <Slider
+                  value={priceRange}
+                  onValueChange={(value) => {
+                    handleFilterChange();
+                    if (isPaid) setPriceRange(value);
+                  }}
+                  max={5000}
+                  min={500}
+                  step={100}
+                  className="w-full"
+                  disabled={!isPaid}
+                />
+                <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                  <span>500</span>
+                  <span className="font-medium">{priceRange[0]}</span>
+                  <span>5000</span>
+                </div>
               </div>
             </div>
 
-            {/* Results Count */}
-            <div className="pt-2 border-t border-gray-800">
-              <p className="text-sm text-gray-400">
-                Showing {filteredVenues.length} of {venues?.length || 0} venues
-              </p>
+            <div className={!isPaid ? "opacity-50" : ""}>
+              <Label className="text-sm font-medium mb-3 block">Tags</Label>
+              <div className="grid grid-cols-2 gap-2">
+                {tags.map((tag) => (
+                  <div key={tag} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={tag}
+                      checked={selectedTags.includes(tag)}
+                      onCheckedChange={(checked) => {
+                        handleFilterChange();
+                        if (isPaid) {
+                          if (checked) {
+                            setSelectedTags([...selectedTags, tag]);
+                          } else {
+                            setSelectedTags(selectedTags.filter((t) => t !== tag));
+                          }
+                        }
+                      }}
+                      disabled={!isPaid}
+                    />
+                    <Label htmlFor={tag} className="text-sm cursor-pointer">
+                      {tag}
+                    </Label>
+                  </div>
+                ))}
+              </div>
             </div>
+
+            {isPaid ? (
+              <Button 
+                className="w-full bg-transparent" 
+                variant="outline"
+                onClick={() => {
+                  setVenueType("");
+                  setDistrict("");
+                  setScoreRange([8.0]);
+                  setPriceRange([1500]);
+                  setSelectedTags([]);
+                  setShowVeteranPath(false);
+                }}
+              >
+                Reset Filters
+              </Button>
+            ) : (
+              <Button 
+                className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-bold"
+                onClick={() => setShowPaywall(true)}
+              >
+                <Lock className="h-4 w-4 mr-2" />
+                Unlock All Filters
+              </Button>
+            )}
           </CardContent>
         </Card>
 
-        {/* Map Legend */}
-        <Card className="absolute bottom-4 right-4 bg-gray-900/95 backdrop-blur border-gray-800">
-          <CardContent className="p-3">
-            <h4 className="text-sm font-medium text-gray-300 mb-2">Score Legend</h4>
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <MapPin className="h-4 w-4 text-green-400" fill="currentColor" />
-                <span className="text-xs text-gray-400">Excellent (8.5+)</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <MapPin className="h-4 w-4 text-gray-400" fill="currentColor" />
-                <span className="text-xs text-gray-400">Average (7.0-8.5)</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <MapPin className="h-4 w-4 text-red-400" fill="currentColor" />
-                <span className="text-xs text-gray-400">Poor (&lt;7.0)</span>
+        {/* Map Container */}
+        <div ref={mapContainer} className="h-full w-full">
+          {!env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN && (
+            <div className="h-full bg-muted flex items-center justify-center">
+              <div className="text-center">
+                <MapPin className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+                <h3 className="text-lg font-semibold mb-2">Map Configuration Required</h3>
+                <p className="text-muted-foreground">
+                  Please add NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN to your environment variables
+                </p>
               </div>
             </div>
-          </CardContent>
-        </Card>
+          )}
+        </div>
+        
+        {/* Show sample venues for non-paid users */}
+        {!isPaid && map.current && (
+          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-10">
+            <Card className="bg-black/80 backdrop-blur">
+              <CardContent className="p-4">
+                <p className="text-sm text-center">
+                  <Lock className="inline h-4 w-4 mr-2 text-yellow-500" />
+                  Showing sample venues only. 
+                  <Button
+                    variant="link"
+                    className="text-yellow-500 p-0 ml-1"
+                    onClick={() => setShowPaywall(true)}
+                  >
+                    Unlock all {venues?.length || "200+"} venues
+                  </Button>
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        )}
       </div>
-
-      <style jsx global>{`
-        .mongermaps-popup .mapboxgl-popup-content {
-          background-color: rgb(17 24 39);
-          color: white;
-          border: 1px solid rgb(31 41 55);
-          border-radius: 0.5rem;
-          padding: 0;
-        }
-        .mongermaps-popup .mapboxgl-popup-tip {
-          border-top-color: rgb(17 24 39);
-        }
-      `}</style>
-    </AppShell>
+      
+      <PaywallModal
+        isOpen={showPaywall}
+        onClose={() => setShowPaywall(false)}
+        feature="interactive map with all venues"
+      />
+    </Shell>
   );
 }
