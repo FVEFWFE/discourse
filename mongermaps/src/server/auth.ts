@@ -23,6 +23,7 @@ declare module "next-auth" {
     user: {
       id: string;
       username: string;
+      isPaid?: boolean;
       // ...other properties
       // role: UserRole;
     } & DefaultSession["user"];
@@ -31,6 +32,7 @@ declare module "next-auth" {
   interface User {
     id: string;
     username: string;
+    isPaid?: boolean;
     // ...other properties
     // role: UserRole;
   }
@@ -48,14 +50,30 @@ const loginSchema = z.object({
  */
 export const authOptions: NextAuthOptions = {
   callbacks: {
-    session: ({ session, token }) => ({
-      ...session,
-      user: {
-        ...session.user,
-        id: token.sub!,
-        username: token.username as string,
-      },
-    }),
+    session: async ({ session, token }) => {
+      // Check if user has active subscription
+      let isPaid = false;
+      if (token.sub) {
+        const activeSubscription = await db.subscription.findFirst({
+          where: {
+            userId: token.sub,
+            status: "ACTIVE",
+            endDate: { gte: new Date() }
+          }
+        });
+        isPaid = !!activeSubscription;
+      }
+      
+      return {
+        ...session,
+        user: {
+          ...session.user,
+          id: token.sub!,
+          username: token.username as string,
+          isPaid,
+        },
+      };
+    },
     jwt: async ({ token, user }) => {
       if (user) {
         token.username = user.username;

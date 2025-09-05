@@ -7,6 +7,7 @@ import { reportRouter } from "~/server/api/routers/report";
 import { subscriptionRouter } from "~/server/api/routers/subscription";
 import { referralRouter } from "~/server/api/routers/referral";
 import { dashboardRouter } from "~/server/api/routers/dashboard";
+import { intelligenceRouter } from "~/server/api/routers/intelligence";
 
 /**
  * This is the primary router for your server.
@@ -22,6 +23,7 @@ export const appRouter = createTRPCRouter({
   subscription: subscriptionRouter,
   referral: referralRouter,
   dashboard: dashboardRouter,
+  intelligence: intelligenceRouter,
 });
 
 // export type definition of API
