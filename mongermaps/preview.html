@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MongerMaps Preview</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif; }
+        .blur-effect { filter: blur(4px); }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100">
+    <!-- Navigation -->
+    <nav class="bg-gray-800 border-b border-gray-700">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M19 10c-1.1 0-2 .9-2 2h-1V3L3 8v13h18v-9c0-1.1-.9-2-2-2zM5 9.37l9-3.46V12H9l.48-.48L5 14.54V9.37zM19 19H5v-3.61l5.48-3.97L10.31 12H16v2l2 1.5V12c0 0 0-1.5 1.5-1.5S21 12 21 12v7h-2z"/>
+                </svg>
+                <span class="text-xl font-bold">MongerMaps</span>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button class="bg-gray-700 px-4 py-2 rounded hover:bg-gray-600">Dashboard</button>
+                <button class="bg-gray-700 px-4 py-2 rounded hover:bg-gray-600">Map</button>
+                <button class="bg-yellow-500 text-black px-4 py-2 rounded font-bold hover:bg-yellow-600">Sign In</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Dashboard Preview -->
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold mb-2">Intelligence Briefing</h1>
+        <p class="text-gray-400 mb-8">Last updated: 7 minutes ago via automated scrape</p>
+
+        <!-- KPI Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <div class="bg-gray-800 rounded-lg p-4 border border-gray-700">
+                <h3 class="text-sm text-gray-400 mb-2">Pattaya Vibe Shift (24h)</h3>
+                <div class="text-2xl font-bold text-green-500">+0.2 ↑</div>
+                <p class="text-xs text-green-500">Vibe Score™ rising</p>
+            </div>
+            <div class="bg-gray-800 rounded-lg p-4 border border-gray-700">
+                <h3 class="text-sm text-gray-400 mb-2">Fair Price: Soi 6 ST</h3>
+                <div class="text-2xl font-bold">1300 THB</div>
+                <p class="text-xs text-red-500">Tourist Price: 2000 THB</p>
+            </div>
+            <div class="bg-gray-800 rounded-lg p-4 border border-gray-700 relative overflow-hidden">
+                <div class="absolute inset-0 bg-black/50 backdrop-blur-sm z-10 flex items-center justify-center">
+                    <svg class="w-6 h-6 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                    </svg>
+                </div>
+                <h3 class="text-sm text-gray-400 mb-2">New Reports (6h)</h3>
+                <div class="text-2xl font-bold">184</div>
+                <p class="text-xs text-gray-500">Unlock for details</p>
+            </div>
+            <div class="bg-gray-800 rounded-lg p-4 border border-red-500/50">
+                <h3 class="text-sm text-gray-400 mb-2">Active Scam Alerts</h3>
+                <div class="text-2xl font-bold text-red-500">3</div>
+                <p class="text-xs text-red-500">Pattaya Zone</p>
+            </div>
+        </div>
+
+        <!-- Live Intel Feed -->
+        <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold">Live Intel Feed</h2>
+                <span class="bg-gray-700 px-3 py-1 rounded text-sm">🔒 Limited View</span>
+            </div>
+            <table class="w-full">
+                <thead>
+                    <tr class="text-left text-gray-400 text-sm">
+                        <th class="pb-3">Time</th>
+                        <th class="pb-3">Venue</th>
+                        <th class="pb-3">Player Score™</th>
+                        <th class="pb-3">Price Paid</th>
+                        <th class="pb-3">Tags</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="border-t border-gray-700">
+                        <td class="py-3">14m ago</td>
+                        <td class="blur-effect">Kinnaree</td>
+                        <td><span class="bg-green-500 text-white px-2 py-1 rounded text-sm">9.4</span></td>
+                        <td>1500 THB</td>
+                        <td>
+                            <span class="bg-gray-700 px-2 py-1 rounded text-xs mr-1">GFE</span>
+                            <span class="bg-gray-700 px-2 py-1 rounded text-xs">BBFS</span>
+                        </td>
+                    </tr>
+                    <tr class="border-t border-gray-700">
+                        <td class="py-3">28m ago</td>
+                        <td class="blur-effect">Sapphire A Go Go</td>
+                        <td><span class="bg-green-500 text-white px-2 py-1 rounded text-sm">9.2</span></td>
+                        <td>2000 THB</td>
+                        <td><span class="bg-gray-700 px-2 py-1 rounded text-xs">GFE</span></td>
+                    </tr>
+                    <tr class="border-t border-gray-700">
+                        <td class="py-3">45m ago</td>
+                        <td class="blur-effect">Insomnia (FL)</td>
+                        <td><span class="bg-yellow-500 text-white px-2 py-1 rounded text-sm">8.9</span></td>
+                        <td>1200 THB</td>
+                        <td><span class="bg-gray-700 px-2 py-1 rounded text-xs">Starfish</span></td>
+                    </tr>
+                </tbody>
+            </table>
+            <button onclick="showPaywall()" class="mt-4 w-full bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-3 rounded">
+                View All 184+ Reports
+            </button>
+        </div>
+    </div>
+
+    <!-- Paywall Modal (Hidden by default) -->
+    <div id="paywall" class="fixed inset-0 bg-black/80 z-50 hidden">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-gray-800 rounded-lg p-6 max-w-md w-full border border-gray-700">
+                <div class="text-center mb-4">
+                    <svg class="w-12 h-12 text-yellow-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                    </svg>
+                    <h2 class="text-2xl font-bold mb-2">Get Instant Intelligence Access</h2>
+                    <p class="text-gray-400">Join 2,000+ members getting real-time intelligence</p>
+                </div>
+                
+                <div class="bg-gray-700 rounded p-4 mb-4">
+                    <h3 class="font-semibold mb-2">Get Started Free</h3>
+                    <p class="text-sm text-gray-400 mb-3">Download our Pattaya Fair Price Sheet</p>
+                    <input type="email" placeholder="Enter your email" class="w-full px-3 py-2 bg-gray-600 rounded mb-3">
+                    <button class="w-full bg-blue-600 hover:bg-blue-700 py-2 rounded font-semibold">Get Free PDF</button>
+                </div>
+                
+                <div class="text-center text-gray-500 mb-4">— OR —</div>
+                
+                <div class="bg-gradient-to-r from-yellow-500 to-orange-500 text-black rounded p-4 mb-4">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="font-bold text-lg">Annual Access</h3>
+                            <p class="text-sm">Full platform access</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-bold">$99</div>
+                            <div class="text-xs">per year</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <button class="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-3 rounded mb-4">
+                    Unlock Full Access - $99/year
+                </button>
+                
+                <button onclick="hidePaywall()" class="w-full text-gray-400 hover:text-white">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showPaywall() {
+            document.getElementById('paywall').classList.remove('hidden');
+        }
+        function hidePaywall() {
+            document.getElementById('paywall').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
