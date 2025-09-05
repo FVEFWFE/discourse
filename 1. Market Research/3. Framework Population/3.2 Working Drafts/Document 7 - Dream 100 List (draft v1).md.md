@@ -1,0 +1,22 @@
+Get dream 100 to JV + scrape content from + use DM script on all of them ([[DM people to get feedback, beta testers & affiliates (MongerMap DM script)]])
+- Forums
+	- PattayaMonger.com
+	- SingleManForum.com
+	- BangkokPunters.com
+	- Pattaya-Addicts.com
+	- InternationalSexGuide.nl
+		- no JV
+		- add non TH & KE countries later
+- Subreddits
+	- Pattaya
+- YT channels
+	- BuzzinPattaya
+	- Mac TV travel
+	- Passport bro mongers focused on Thailand + Kenya
+- Porn stars
+	- AsianSexDiary
+- Discords
+	- HalperNL
+	- GentsClubs.com
+- Blogs
+	- ThePornDude
