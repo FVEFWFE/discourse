@@ -1,0 +1,30 @@
+{
+  "name": "Unreal Engine Forums Theme",
+  "component": false,
+  "license_url": "https://github.com/YOUR-USERNAME/discourse-unreal-theme/blob/main/LICENSE",
+  "about_url": "https://github.com/YOUR-USERNAME/discourse-unreal-theme",
+  "authors": "Your Name",
+  "theme_version": "1.0",
+  "minimum_discourse_version": "3.0.0",
+  "assets": {
+    "logo": "assets/ue-logo.png",
+    "logo_small": "assets/ue-logo-small.png"
+  },
+  "color_schemes": {
+    "Unreal Dark": {
+      "primary": "ffffff",
+      "secondary": "0f0f0f",
+      "tertiary": "0090ff", 
+      "quaternary": "00d4ff",
+      "header_background": "0a0a0a",
+      "header_primary": "ffffff",
+      "highlight": "00d4ff",
+      "danger": "e74c3c",
+      "success": "2ecc71",
+      "love": "e74c3c"
+    }
+  },
+  "modifiers": {
+    "serialize_topic_excerpts": true
+  }
+}

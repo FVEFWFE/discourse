@@ -1,0 +1,71 @@
+name: Deploy Discourse
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    types: [closed]
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Deploy to Production
+      uses: appleboy/ssh-action@v0.1.5
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.SSH_KEY }}
+        script: |
+          cd /var/discourse
+          
+          # Pull latest changes from GitHub
+          git fetch origin main
+          git reset --hard origin/main
+          
+          # Copy custom plugins and themes
+          cp -r /tmp/discourse-backup/plugins/* plugins/ || true
+          cp -r /tmp/discourse-backup/themes/* themes/ || true
+          
+          # Rebuild only if files changed
+          if git diff --name-only HEAD~1 | grep -E '(plugin\.rb|assets/|config/)'; then
+            ./launcher rebuild app
+          else
+            ./launcher restart app
+          fi
+          
+  staging:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && github.event.action == 'opened'
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Deploy to Staging
+      uses: appleboy/ssh-action@v0.1.5
+      with:
+        host: ${{ secrets.STAGING_HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.SSH_KEY }}
+        script: |
+          cd /var/discourse
+          git fetch origin pull/${{ github.event.pull_request.number }}/head:pr-${{ github.event.pull_request.number }}
+          git checkout pr-${{ github.event.pull_request.number }}
+          ./launcher rebuild app
+          
+    - name: Comment PR with staging link
+      uses: actions/github-script@v6
+      with:
+        script: |
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: '🚀 Staging deployment complete! View at: https://staging.yourdomain.com'
+          })

@@ -1,36 +1,25 @@
 {
-  "name": "Discourse",
-  "image": "docker.io/discourse/discourse_dev:20250307-0016",
-  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace/discourse,type=bind",
-  "workspaceFolder": "/workspace/discourse",
-  "postStartCommand": "./.devcontainer/scripts/start.rb",
-  "forwardPorts": [
-    9292, // bin/unicorn
-    3000, // bin/rails s
-    4200, // ember-cli
-    8025, // mailhog
-    9229  // chrome remote debug
-  ],
-  "remoteUser": "discourse",
-  "remoteEnv": {
-    "RAILS_DEVELOPMENT_HOSTS": ".app.github.dev",
-    "PGUSER": "discourse",
-    "SELENIUM_FORWARD_DEVTOOLS_TO_PORT": "9229",
+  "name": "Discourse Development",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+    "ghcr.io/devcontainers/features/ruby:1": {
+      "version": "3.3"
+    },
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "20"
+    },
+    "ghcr.io/devcontainers/features/postgresql-client:1": {}
   },
-  "mounts": [
-    "source=${localWorkspaceFolderBasename}-node_modules,target=${containerWorkspaceFolder}/node_modules,type=volume",
-    "source=${localWorkspaceFolderBasename}-pg,target=/shared/postgres_data,type=volume",
-    "source=${localWorkspaceFolderBasename}-redis,target=/shared/redis,type=volume"
-  ],
+  "postCreateCommand": "bash .devcontainer/setup.sh",
+  "forwardPorts": [3000, 1080, 4200],
   "customizations": {
     "vscode": {
       "extensions": [
-        "Shopify.ruby-lsp",
+        "rebornix.ruby",
+        "castwide.solargraph",
         "esbenp.prettier-vscode",
-        "dbaeumer.vscode-eslint",
-        "lifeart.vscode-glimmer-syntax",
-        "typed-ember.glint-vscode",
-        "stylelint.vscode-stylelint"
+        "dbaeumer.vscode-eslint"
       ]
     }
   }

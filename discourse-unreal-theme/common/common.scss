@@ -1,0 +1,210 @@
+// Unreal Engine Forums Theme
+// Mimics forums.unrealengine.com design
+
+// Import UE font
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+// Base styles
+:root {
+  --ue-bg-primary: #0f0f0f;
+  --ue-bg-secondary: #1a1a1a;
+  --ue-bg-tertiary: #242424;
+  --ue-accent: #0090ff;
+  --ue-accent-hover: #00b4ff;
+  --ue-text: #e0e0e0;
+  --ue-border: #2a2a2a;
+}
+
+body {
+  font-family: 'Inter', -apple-system, system-ui, sans-serif;
+  background: var(--ue-bg-primary);
+}
+
+// Header styling
+.d-header {
+  background: linear-gradient(180deg, #0a0a0a 0%, #0f0f0f 100%);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+  border-bottom: 1px solid var(--ue-border);
+  
+  .d-header-icons .icon {
+    color: var(--ue-text);
+    
+    &:hover {
+      color: var(--ue-accent);
+      background: rgba(0,144,255,0.1);
+    }
+  }
+}
+
+// Navigation
+.navigation-container {
+  background: var(--ue-bg-secondary);
+  border-bottom: 2px solid var(--ue-accent);
+  
+  .nav-pills > li {
+    a {
+      color: var(--ue-text);
+      font-weight: 500;
+      
+      &:hover {
+        color: var(--ue-accent);
+        background: rgba(0,144,255,0.1);
+      }
+      
+      &.active {
+        color: #fff;
+        background: var(--ue-accent);
+        font-weight: 600;
+      }
+    }
+  }
+}
+
+// Categories with UE style cards
+.category-list {
+  .category {
+    background: var(--ue-bg-secondary);
+    border: 1px solid var(--ue-border);
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      transform: translateY(-2px);
+      border-color: var(--ue-accent);
+      box-shadow: 0 4px 20px rgba(0,144,255,0.2);
+    }
+    
+    .category-title-link {
+      color: var(--ue-accent);
+      font-weight: 600;
+    }
+  }
+}
+
+// Topic list
+.topic-list {
+  background: var(--ue-bg-secondary);
+  border-radius: 8px;
+  overflow: hidden;
+  
+  .topic-list-header {
+    background: var(--ue-bg-tertiary);
+    border-bottom: 2px solid var(--ue-accent);
+    
+    th {
+      color: var(--ue-text);
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.85em;
+    }
+  }
+  
+  .topic-list-item {
+    border-bottom: 1px solid var(--ue-border);
+    transition: background 0.2s ease;
+    
+    &:hover {
+      background: rgba(0,144,255,0.05);
+    }
+    
+    .main-link {
+      .title {
+        color: var(--ue-text);
+        font-weight: 500;
+        
+        &:hover {
+          color: var(--ue-accent);
+        }
+      }
+    }
+    
+    .topic-excerpt {
+      color: #999;
+      font-size: 0.9em;
+    }
+  }
+}
+
+// Buttons
+.btn {
+  border-radius: 6px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  
+  &.btn-primary {
+    background: var(--ue-accent);
+    border: none;
+    
+    &:hover {
+      background: var(--ue-accent-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0,144,255,0.3);
+    }
+  }
+  
+  &.btn-default {
+    background: var(--ue-bg-tertiary);
+    border: 1px solid var(--ue-border);
+    color: var(--ue-text);
+    
+    &:hover {
+      border-color: var(--ue-accent);
+      color: var(--ue-accent);
+    }
+  }
+}
+
+// User cards & avatars
+.user-card {
+  background: var(--ue-bg-secondary);
+  border: 1px solid var(--ue-border);
+  border-radius: 12px;
+  
+  .user-card-avatar {
+    border: 3px solid var(--ue-accent);
+  }
+}
+
+// Code blocks
+pre code {
+  background: #0a0a0a;
+  border: 1px solid var(--ue-border);
+  border-radius: 6px;
+  color: #e0e0e0;
+}
+
+// Composer
+.d-editor-textarea-wrapper {
+  background: var(--ue-bg-secondary);
+  border: 1px solid var(--ue-border);
+  border-radius: 8px;
+  
+  &:focus-within {
+    border-color: var(--ue-accent);
+    box-shadow: 0 0 0 3px rgba(0,144,255,0.1);
+  }
+}
+
+// Badges
+.badge-category {
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+
+// Search
+.search-container {
+  .search-advanced {
+    background: var(--ue-bg-secondary);
+    border: 1px solid var(--ue-border);
+  }
+}
+
+// Mobile responsive
+@media (max-width: 768px) {
+  .topic-list .main-link {
+    .title {
+      font-size: 0.95em;
+    }
+  }
+}
